@@ -73,7 +73,7 @@ PRE_EXEC_MESSAGE=""
 # Set the database root dir
 DATABASE_BASE_DIR="${DATABASE_BASE_DIR:-/data/db}"
 # set the database directory
-DATABASE_DIR="${DATABASE_DIR_TEMPLATEMGR:-/data/db/sqlite}"
+DATABASE_DIR="${DATABASE_DIR_PHP:-/data/db/sqlite}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set webroot
 WWW_ROOT_DIR="/usr/share/httpd/default"
@@ -97,12 +97,12 @@ ROOT_FILE_PREFIX="/config/secure/auth/root" # directory to save username/passwor
 USER_FILE_PREFIX="/config/secure/auth/user" # directory to save username/password for normal user
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # root/admin user info password/random]
-root_user_name="${TEMPLATEMGR_ROOT_USER_NAME:-}" # root user name
-root_user_pass="${TEMPLATEMGR_ROOT_PASS_WORD:-}" # root user password
+root_user_name="${PHP_ROOT_USER_NAME:-}" # root user name
+root_user_pass="${PHP_ROOT_PASS_WORD:-}" # root user password
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Normal user info [password/random]
-user_name="${TEMPLATEMGR_USER_NAME:-}"      # normal user name
-user_pass="${TEMPLATEMGR_USER_PASS_WORD:-}" # normal user password
+user_name="${PHP_USER_NAME:-}"      # normal user name
+user_pass="${PHP_USER_PASS_WORD:-}" # normal user password
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Overwrite variables from files
 __file_exists_with_content "${USER_FILE_PREFIX}/${SERVICE_NAME}_name" && user_name="$(<"${USER_FILE_PREFIX}/${SERVICE_NAME}_name")"
@@ -363,14 +363,14 @@ __create_service_env() {
 #ENV_EXEC_CMD_NAME="$(basename "$EXEC_CMD_BIN")"                     # set the binary name
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # root/admin user info [password/random]
-#ENV_ROOT_USER_NAME="${ENV_ROOT_USER_NAME:-$TEMPLATEMGR_ROOT_USER_NAME}"   # root user name
-#ENV_ROOT_USER_PASS="${ENV_ROOT_USER_NAME:-$TEMPLATEMGR_ROOT_PASS_WORD}"   # root user password
+#ENV_ROOT_USER_NAME="${ENV_ROOT_USER_NAME:-$PHP_ROOT_USER_NAME}"   # root user name
+#ENV_ROOT_USER_PASS="${ENV_ROOT_USER_NAME:-$PHP_ROOT_PASS_WORD}"   # root user password
 #root_user_name="${ENV_ROOT_USER_NAME:-$root_user_name}"                              #
 #root_user_pass="${ENV_ROOT_USER_PASS:-$root_user_pass}"                              #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #Normal user info [password/random]
-#ENV_USER_NAME="${ENV_USER_NAME:-$TEMPLATEMGR_USER_NAME}"                  #
-#ENV_USER_PASS="${ENV_USER_PASS:-$TEMPLATEMGR_USER_PASS_WORD}"             #
+#ENV_USER_NAME="${ENV_USER_NAME:-$PHP_USER_NAME}"                  #
+#ENV_USER_PASS="${ENV_USER_PASS:-$PHP_USER_PASS_WORD}"             #
 #user_name="${ENV_USER_NAME:-$user_name}"                                             # normal user name
 #user_pass="${ENV_USER_PASS:-$user_pass}"                                             # normal user password
 
