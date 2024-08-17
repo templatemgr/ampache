@@ -139,7 +139,7 @@ IS_WEB_SERVER="yes"
 IS_DATABASE_SERVICE="no"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Load variables from config
-[ -f "$CONF_DIR/env/apache2.sh" ] && . "$CONF_DIR/env/apache2.sh"
+[ -f "/config/env/apache2.sh" ] && . "/config/env/apache2.sh"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional predefined variables
 
@@ -618,9 +618,9 @@ else
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Change to working directory
-[ "$HOME" = "/root" ] && [ "$RUNAS_USER" != "root" ] && [ "$PWD" != "/tmp" ] && __cd "/tmp" && echo "Changed to $PWD"
-[ "$HOME" = "/root" ] && [ "$SERVICE_USER" != "root" ] && [ "$PWD" != "/tmp" ] && __cd "/tmp" && echo "Changed to $PWD"
-[ -n "$WORK_DIR" ] && [ -n "$EXEC_CMD_BIN" ] && [ "$PWD" != "$WORK_DIR" ] && __cd "$WORK_DIR" && echo "Changed to $PWD"
+[ -n "$WORK_DIR" ] && [ -n "$EXEC_CMD_BIN" ] && [ "$PWD" != "$WORK_DIR" ] && __cd "$WORK_DIR" && echo "Setting the working directory to: $PWD"
+[ -z "$WORK_DIR" ] && [ "$HOME" = "/root" ] && [ "$RUNAS_USER" != "root" ] && [ "$PWD" != "/tmp" ] && __cd "/tmp" && echo "Setting the working directory to: $PWD"
+[ -z "$WORK_DIR" ] && [ "$HOME" = "/root" ] && [ "$SERVICE_USER" != "root" ] && [ "$PWD" != "/tmp" ] && __cd "/tmp" && echo "Setting the working directory to: $PWD" && WORK_DIR="" || WORK_DIR="${WORK_DIR:-$PWD}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # show init message
 __pre_message
