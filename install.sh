@@ -26,6 +26,7 @@
 # shellcheck disable=SC2317
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # BASH_SET_SAVED_OPTIONS=$(set +o)
+set -e
 [ "$DEBUGGER" = "on" ] && echo "Enabling debugging" && set -x
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set default exit code
@@ -61,17 +62,21 @@ INIT_DIR="/usr/local/etc/docker/init.d"
 GIT_REPO="https://github.com/templatemgr/$TEMPLATE_NAME"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 OS_RELEASE="$(grep -si "$EXPECTED_OS" /etc/*-release* | sed 's|.*=||g;s|"||g' | head -n1)"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 [ -n "$OS_RELEASE" ] || { echo "Unexpected OS: ${OS_RELEASE:-N/A}" && exit 1; }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+[ -n "$WWW_ROOT_DIR" ] || { echo "Please set WWW_ROOT_DIR" && exit 1; }
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 [ "$TEMPLATE_NAME" != "sample-template" ] || { echo "Please set TEMPLATE_NAME" && exit 1; }
-git clone -q "$GIT_REPO" "$TMP_DIR" || { echo "Failed to clone the repo" exit 1; }
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+git clone -q "$GIT_REPO" "$TMP_DIR" || { echo "Failed to clone the repo" && exit 1; }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main application
 mkdir -p "$CONFIG_DIR" "$INIT_DIR"
 find "$TMP_DIR/" -iname '.gitkeep' -exec rm -f {} \;
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # custom pre execution commands
-rm -Rf "${WWW_ROOT_DIR:-/usr/share/webapps/ampache}"
+rm -Rf "${WWW_ROOT_DIR:?}"
 rm -Rf "/etc/apache2/conf.d" "/etc/apache2/httpd"* "/var/www/localhost"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 get_dir_list="$(__find_directory_relative "$TMP_DIR/config" || false)"
@@ -125,13 +130,24 @@ fi
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # custom operations
-AMPACHE_RELEASE="$AMPACHE_RELEASE:-$(curl -q -LSsf "https://api.github.com/repos/ampache/ampache/releases/latest" | grep browser_download_url | sed 's|^.* ||g;s|"||g')"
-AMPACHE_FILENAME="${AMPACHE_FILENAME:-ampache-${AMPACHE_VERSION}_all_php8.1.zip}"
-AMPACHE_RETRY_FILENAME="$ampache-${AMPACHE_VERSION}_all.zip"
-mkdir -p "${WWW_ROOT_DIR:-/usr/share/webapps/ampache}"
-{ wget -nv "https://github.com/ampache/ampache/releases/download/${AMPACHE_VERSION}/${AMPACHE_FILENAME}" -O "/tmp/ampache.zip" ||
-  wget -nv "https://github.com/ampache/ampache/releases/download/${AMPACHE_VERSION}/${AMPACHE_RETRY_FILENAME}" -O "/tmp/ampache.zip"; } &&
-  unzip -q "/tmp/ampache.zip" -d "${WWW_ROOT_DIR:-/usr/share/webapps/ampache}"
+AMPACHE_TMP_FILE="/tmp/ampache.zip"
+AMPACHE_PHP_VER="${AMPACHE_PHP_VER:-8.4}"
+AMPACHE_LASTEST="$(curl -q -LSsf "https://api.github.com/repos/ampache/ampache/releases" | jq -rc '.[].tag_name' | sort -rV | head -n1 | grep '^' || false)"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+AMPACHE_VERSION="${AMPACHE_LASTEST:-$AMPACHE_VERSION}"
+AMPACHE_RETRY_FILENAME="ampache-${AMPACHE_VERSION}_all.zip"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+AMPACHE_BACKUP="https://github.com/ampache/ampache/releases/download/${AMPACHE_VERSION}/${AMPACHE_RETRY_FILENAME}"
+AMPACHE_RELEASE="https://github.com/ampache/ampache/releases/download/${AMPACHE_VERSION}/ampache-${AMPACHE_VERSION}_all_php${AMPACHE_PHP_VER}.zip"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+mkdir -p "$WWW_ROOT_DIR"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if { wget -nv "$AMPACHE_RELEASE" -O "$AMPACHE_TMP_FILE" || wget -nv "$AMPACHE_BACKUP" -O "$AMPACHE_TMP_FILE"; }; then
+  unzip -qq "$AMPACHE_TMP_FILE" -d "$WWW_ROOT_DIR"
+  INSTALL_SH_EXIT_STATUS=$?
+else
+  echo "Failed to download AMPACHE" && exit 1
+fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if [ -n "$CONFIG_CHECK_FILE" ]; then
   if [ ! -f "$CONFIG_DIR/$CONFIG_CHECK_FILE" ]; then
