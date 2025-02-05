@@ -63,11 +63,11 @@ GIT_REPO="https://github.com/templatemgr/$TEMPLATE_NAME"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 OS_RELEASE="$(grep -si "$EXPECTED_OS" /etc/*-release* | sed 's|.*=||g;s|"||g' | head -n1)"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+[ "$TEMPLATE_NAME" != "sample-template" ] || { echo "Please set TEMPLATE_NAME" && exit 1; }
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 [ -n "$OS_RELEASE" ] || { echo "Unexpected OS: ${OS_RELEASE:-N/A}" && exit 1; }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 [ -n "$WWW_ROOT_DIR" ] || { echo "Please set WWW_ROOT_DIR" && exit 1; }
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-[ "$TEMPLATE_NAME" != "sample-template" ] || { echo "Please set TEMPLATE_NAME" && exit 1; }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 git clone -q "$GIT_REPO" "$TMP_DIR" || { echo "Failed to clone the repo" && exit 1; }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
